@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Liquidación de Sueldo · Chile 2026</title>
+<style>
+  :root{
+    --ink:#1a1a1a; --paper:#f7f4ee; --line:#d8d0c2;
+    --accent:#0b6b4f; --accent-soft:#e4efe9; --red:#a3341f;
+    --muted:#6a6559;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:"Segoe UI",system-ui,sans-serif;
+    background:var(--paper); color:var(--ink);
+    line-height:1.5; padding:24px 16px;
+  }
+  .wrap{max-width:860px;margin:0 auto}
+  header{border-bottom:2px solid var(--ink);padding-bottom:14px;margin-bottom:22px}
+  .eyebrow{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted)}
+  h1{font-family:Georgia,serif;font-size:30px;font-weight:600;letter-spacing:-.5px}
+  h1 span{color:var(--accent)}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:28px}
+  @media(max-width:720px){.grid{grid-template-columns:1fr}}
+  .panel{background:#fff;border:1px solid var(--line);border-radius:10px;padding:20px}
+  .panel h2{font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:16px;border-bottom:1px solid var(--line);padding-bottom:8px}
+  label{display:block;font-size:13px;font-weight:600;margin:14px 0 5px}
+  label:first-of-type{margin-top:0}
+  input,select{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:7px;font-size:15px;background:var(--paper)}
+  input:focus,select:focus{outline:2px solid var(--accent);border-color:transparent}
+  .hint{font-size:11px;color:var(--muted);margin-top:4px}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .result-line{display:flex;justify-content:space-between;padding:9px 0;font-size:14px;border-bottom:1px dashed var(--line)}
+  .result-line.neg span:last-child{color:var(--red)}
+  .result-line strong{font-variant-numeric:tabular-nums}
+  .subtotal{display:flex;justify-content:space-between;padding:11px 0;font-weight:600;border-bottom:1px solid var(--ink);margin-top:4px}
+  .liquido{background:var(--accent);color:#fff;border-radius:10px;padding:20px;margin-top:18px;display:flex;justify-content:space-between;align-items:baseline}
+  .liquido .lbl{font-size:12px;letter-spacing:2px;text-transform:uppercase;opacity:.85}
+  .liquido .val{font-family:Georgia,serif;font-size:34px;font-weight:600;font-variant-numeric:tabular-nums}
+  .group-title{font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--accent);font-weight:700;margin:16px 0 4px}
+  .empty{color:var(--muted);font-size:14px;text-align:center;padding:30px 0}
+  footer{font-size:11px;color:var(--muted);margin-top:24px;text-align:center;line-height:1.7}
+  .toggle{display:flex;align-items:center;gap:8px;margin-top:14px}
+  .toggle input{width:auto}
+  .toggle label{margin:0}
+  .save-bar{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+  .btn{flex:1;min-width:110px;padding:10px;border:1px solid var(--accent);background:var(--accent);color:#fff;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer}
+  .btn.ghost{background:#fff;color:var(--accent)}
+  .btn:hover{opacity:.9}
+  .saved-item{display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:var(--paper);border:1px solid var(--line);border-radius:7px;margin-top:6px;font-size:13px}
+  .saved-item button{border:none;background:none;cursor:pointer;font-size:13px;padding:2px 6px;border-radius:4px}
+  .saved-item .load{color:var(--accent);font-weight:600}
+  .saved-item .del{color:var(--red)}
+  .autosave-note{font-size:11px;color:var(--accent);margin-top:8px;display:flex;align-items:center;gap:5px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Trabajador dependiente · AFP</div>
+    <h1>Liquidación de <span>Sueldo</span> · Chile 2026</h1>
+  </header>
+
+  <div class="grid">
+    <div class="panel">
+      <h2>Datos</h2>
+
+      <label>Sueldo base imponible (mensual)</label>
+      <input type="text" id="base" inputmode="numeric" placeholder="$ 800.000">
+      <div class="hint">Renta bruta afecta a cotizaciones.</div>
+
+      <label>Haberes no imponibles</label>
+      <div class="row2">
+        <div>
+          <input type="text" id="movilizacion" inputmode="numeric" placeholder="Movilización">
+          <div class="hint">Movilización</div>
+        </div>
+        <div>
+          <input type="text" id="colacion" inputmode="numeric" placeholder="Colación">
+          <div class="hint">Colación</div>
+        </div>
+      </div>
+
+      <div class="group-title">Gratificación legal</div>
+      <select id="gratif">
+        <option value="none">Sin gratificación</option>
+        <option value="25">25% mensual (tope 4,75 IMM)</option>
+        <option value="incluida">Ya incluida en el base</option>
+      </select>
+
+      <div class="group-title">Horas extra</div>
+      <div class="row2">
+        <div>
+          <input type="text" id="hextra" inputmode="numeric" placeholder="0">
+          <div class="hint">N.º de horas</div>
+        </div>
+        <div>
+          <input type="text" id="hextraValor" inputmode="numeric" placeholder="Valor c/hora">
+          <div class="hint">$ por hora (auto si vacío)</div>
+        </div>
+      </div>
+      <div class="hint">Recargo legal 50%. Auto (jornada 44h) = base ÷ 120 por hora.</div>
+
+      <div class="group-title">Previsión</div>
+      <label>AFP</label>
+      <select id="afp"></select>
+
+      <label>Salud</label>
+      <select id="salud">
+        <option value="7">Fonasa (7%)</option>
+        <option value="isapre">Isapre (plan en UF)</option>
+      </select>
+      <div id="isapreBox" style="display:none">
+        <label>Valor plan Isapre (UF)</label>
+        <input type="text" id="isapreUF" inputmode="decimal" placeholder="Ej: 4,5">
+      </div>
+
+      <div class="group-title">APV (opcional)</div>
+      <label>Ahorro Previsional Voluntario (mensual)</label>
+      <input type="text" id="apv" inputmode="numeric" placeholder="$ 0">
+      <div class="hint">Régimen B: rebaja impuesto (tope 50 UF/mes).</div>
+
+      <div class="group-title">Tipo de contrato</div>
+      <select id="contrato">
+        <option value="indefinido">Indefinido (cesantía 0,6% trabajador)</option>
+        <option value="plazo">Plazo fijo (trabajador no aporta)</option>
+      </select>
+
+      <div class="group-title">Valores del mes (editables)</div>
+      <div class="row2">
+        <div>
+          <input type="text" id="uf" inputmode="decimal" value="40.826">
+          <div class="hint">Valor UF (tope = 90 UF)</div>
+        </div>
+        <div>
+          <input type="text" id="utmVal" inputmode="numeric" value="71.649">
+          <div class="hint">Valor UTM (impuesto)</div>
+        </div>
+      </div>
+      <label>Ingreso mínimo mensual (IMM)</label>
+      <input type="text" id="immVal" inputmode="numeric" value="553.554">
+      <div class="hint">Define el tope de gratificación (4,75 IMM ÷ 12).</div>
+
+      <div class="group-title">Guardar liquidación</div>
+      <input type="text" id="nombreGuardado" placeholder="Nombre (ej: Julio 2026)">
+      <div class="save-bar">
+        <button class="btn" id="btnGuardar">Guardar</button>
+        <button class="btn ghost" id="btnLimpiar">Limpiar campos</button>
+      </div>
+      <div class="autosave-note">✓ Tus datos se guardan automáticamente al escribir.</div>
+      <div id="listaGuardados"></div>
+    </div>
+
+    <div class="panel">
+      <h2>Resultado</h2>
+      <div id="out"><div class="empty">Ingresa el sueldo base para calcular.</div></div>
+    </div>
+  </div>
+
+  <footer>
+    Cálculo referencial según normativa vigente 2026 · Tope imponible 90 UF · Impuesto único 2.ª categoría (tabla SII en UTM).<br>
+    Verifica UF, UTM y comisión de tu AFP al momento del pago. No reemplaza la liquidación oficial del empleador.
+  </footer>
+</div>
+
+<script>
+// Comisiones AFP 2026 (% renta imponible)
+const AFPS = [
+  {n:"Uno", c:0.49}, {n:"Modelo", c:0.58}, {n:"PlanVital", c:1.16},
+  {n:"Habitat", c:1.19}, {n:"Capital", c:1.44}, {n:"Cuprum", c:1.44},
+  {n:"ProVida", c:1.45}
+];
+const UTM_DEF = 71649;      // UTM julio 2026 (editable en el formulario)
+const IMM_DEF = 553554;     // Ingreso mínimo mensual (editable)
+const TOPE_UF = 90;
+const AFC_TRAB = 0.6;       // % cesantía trabajador (indefinido)
+
+// Tabla impuesto único 2.ª categoría (mensual, en UTM)
+const TRAMOS = [
+  {desde:0,     hasta:13.5,  factor:0,     rebaja:0},
+  {desde:13.5,  hasta:30,    factor:0.04,  rebaja:0.54},
+  {desde:30,    hasta:50,    factor:0.08,  rebaja:1.74},
+  {desde:50,    hasta:70,    factor:0.135, rebaja:4.49},
+  {desde:70,    hasta:90,    factor:0.23,  rebaja:11.14},
+  {desde:90,    hasta:120,   factor:0.304, rebaja:17.80},
+  {desde:120,   hasta:310,   factor:0.35,  rebaja:23.32},
+  {desde:310,   hasta:1e9,   factor:0.40,  rebaja:38.82}
+];
+
+const afpSel = document.getElementById('afp');
+AFPS.forEach((a,i)=>{
+  const o=document.createElement('option');
+  o.value=a.c; o.textContent=`${a.n} (${a.c.toFixed(2).replace('.',',')}%)`;
+  if(i===0)o.selected=true; afpSel.appendChild(o);
+});
+
+const $ = id => document.getElementById(id);
+const num = id => {
+  const v = $(id).value.replace(/[^\d,]/g,'').replace(',', '.');
+  return v===''?0:parseFloat(v)||0;
+};
+const numInt = id => {
+  const v = $(id).value.replace(/[^\d]/g,'');
+  return v===''?0:parseInt(v)||0;
+};
+const fmt = n => '$'+Math.round(n).toLocaleString('es-CL');
+
+$('salud').addEventListener('change',()=>{
+  $('isapreBox').style.display = $('salud').value==='isapre'?'block':'none';
+  calc();
+});
+
+['base','movilizacion','colacion','gratif','hextra','hextraValor','afp','salud','isapreUF','apv','contrato','uf','utmVal','immVal']
+  .forEach(id=>$(id).addEventListener('input',calc));
+$('gratif').addEventListener('change',calc);
+$('afp').addEventListener('change',calc);
+$('contrato').addEventListener('change',calc);
+
+function line(label,val,neg){
+  return `<div class="result-line ${neg?'neg':''}"><span>${label}</span><strong>${neg?'−':''}${fmt(val)}</strong></div>`;
+}
+
+function calc(){
+  const base = numInt('base');
+  const out = $('out');
+  if(base<=0){ out.innerHTML='<div class="empty">Ingresa el sueldo base para calcular.</div>'; return; }
+
+  const uf = num('uf') || 40826;
+  const utm = numInt('utmVal') || UTM_DEF;
+  const imm = numInt('immVal') || IMM_DEF;
+  const topePesos = TOPE_UF * uf;
+
+  // Gratificación
+  let gratif = 0;
+  const gMode = $('gratif').value;
+  if(gMode==='25'){
+    const tope = (4.75 * imm) / 12;
+    gratif = Math.min(base*0.25, tope);
+  }
+
+  // Horas extra
+  const nHoras = numInt('hextra');
+  let valorHora = numInt('hextraValor');
+  if(nHoras>0 && valorHora===0){
+    valorHora = base/120;   // jornada 44h: hora ordinaria = base/180, recargo 50% → base/120
+  }
+  const horasExtra = nHoras * valorHora;
+
+  // Imponible (afecto a cotizaciones), sin no imponibles
+  const imponibleReal = base + gratif + horasExtra;
+  const imponible = Math.min(imponibleReal, topePesos);
+
+  // Cotizaciones
+  const afpPct = 10 + parseFloat($('afp').value);
+  const afp = imponible * afpPct/100;
+
+  let salud, saludLabel;
+  if($('salud').value==='isapre'){
+    const planUF = num('isapreUF');
+    const planPesos = planUF*uf;
+    const legal = imponible*0.07;
+    salud = Math.max(planPesos, legal);
+    saludLabel = `Salud (Isapre ${planUF? planUF.toString().replace('.',',')+' UF':'7%'})`;
+  } else {
+    salud = imponible*0.07;
+    saludLabel = 'Salud (Fonasa 7%)';
+  }
+
+  const cesantiaOn = $('contrato').value==='indefinido';
+  const cesantia = cesantiaOn ? imponible*AFC_TRAB/100 : 0;
+
+  const apv = numInt('apv');
+
+  const totalPrev = afp + salud + cesantia;
+
+  // Base tributable = imponible − cotizaciones obligatorias − APV
+  const baseTrib = Math.max(0, imponible - totalPrev - apv);
+  const baseUTM = baseTrib / utm;
+  let impuesto = 0, tramoTxt='Exento';
+  for(const t of TRAMOS){
+    if(baseUTM>t.desde && baseUTM<=t.hasta){
+      impuesto = (baseTrib*t.factor) - (t.rebaja*utm);
+      if(impuesto<0)impuesto=0;
+      tramoTxt = t.factor===0?'Exento':(t.factor*100).toFixed(1).replace('.',',')+'%';
+      break;
+    }
+  }
+
+  const noImponible = numInt('movilizacion')+numInt('colacion');
+  const totalHaberes = base + gratif + horasExtra + noImponible;
+  const totalDesc = totalPrev + apv + impuesto;
+  const liquido = totalHaberes - totalDesc;
+
+  let html = '<div class="group-title">Haberes</div>';
+  html += line('Sueldo base', base);
+  if(gratif>0) html += line('Gratificación legal', gratif);
+  if(horasExtra>0) html += line(`Horas extra (${nHoras} × ${fmt(valorHora)})`, horasExtra);
+  if(noImponible>0) html += line('No imponibles (movil.+colación)', noImponible);
+  html += `<div class="subtotal"><span>Total haberes</span><span>${fmt(totalHaberes)}</span></div>`;
+
+  html += '<div class="group-title">Descuentos</div>';
+  html += line(`AFP (${afpPct.toFixed(2).replace('.',',')}%)`, afp, true);
+  html += line(saludLabel, salud, true);
+  if(cesantiaOn) html += line('Seguro cesantía (0,6%)', cesantia, true);
+  if(apv>0) html += line('APV', apv, true);
+  html += line(`Impuesto único (${tramoTxt})`, impuesto, true);
+  html += `<div class="subtotal"><span>Total descuentos</span><span>−${fmt(totalDesc)}</span></div>`;
+
+  if(imponibleReal>topePesos){
+    html += `<div class="hint" style="margin-top:8px">⚠ Imponible topado en 90 UF (${fmt(topePesos)}). Cotizaciones calculadas sobre el tope.</div>`;
+  }
+
+  html += `<div class="liquido"><span class="lbl">Líquido a pagar</span><span class="val">${fmt(liquido)}</span></div>`;
+
+  out.innerHTML = html;
+}
+
+// Formateo de miles al escribir en campos de pesos
+['base','movilizacion','colacion','hextra','hextraValor','apv'].forEach(id=>{
+  $(id).addEventListener('blur',e=>{
+    const v = e.target.value.replace(/[^\d]/g,'');
+    if(v) e.target.value = parseInt(v).toLocaleString('es-CL');
+  });
+});
+
+/* ---------- Guardado de datos ---------- */
+const CAMPOS = ['base','movilizacion','colacion','gratif','hextra','hextraValor',
+  'afp','salud','isapreUF','apv','contrato','uf','utmVal','immVal'];
+const KEY_AUTO = 'liquidacion_auto';
+const KEY_LISTA = 'liquidacion_guardadas';
+
+function leerFormulario(){
+  const d = {};
+  CAMPOS.forEach(id => d[id] = $(id).value);
+  return d;
+}
+
+function escribirFormulario(d){
+  CAMPOS.forEach(id => { if(d[id]!==undefined) $(id).value = d[id]; });
+  $('isapreBox').style.display = $('salud').value==='isapre' ? 'block':'none';
+  calc();
+}
+
+function autoguardar(){
+  try{ localStorage.setItem(KEY_AUTO, JSON.stringify(leerFormulario())); }catch(e){}
+}
+
+function getGuardadas(){
+  try{ return JSON.parse(localStorage.getItem(KEY_LISTA)) || {}; }catch(e){ return {}; }
+}
+
+function setGuardadas(obj){
+  try{ localStorage.setItem(KEY_LISTA, JSON.stringify(obj)); }catch(e){}
+}
+
+function renderLista(){
+  const lista = getGuardadas();
+  const nombres = Object.keys(lista);
+  const cont = $('listaGuardados');
+  if(nombres.length===0){ cont.innerHTML=''; return; }
+  cont.innerHTML = nombres.map(n =>
+    `<div class="saved-item">
+       <span>${n}</span>
+       <span>
+         <button class="load" data-load="${n}">Cargar</button>
+         <button class="del" data-del="${n}">Borrar</button>
+       </span>
+     </div>`).join('');
+  cont.querySelectorAll('[data-load]').forEach(b=>{
+    b.onclick = ()=>{ escribirFormulario(getGuardadas()[b.dataset.load]); autoguardar(); };
+  });
+  cont.querySelectorAll('[data-del]').forEach(b=>{
+    b.onclick = ()=>{
+      const l = getGuardadas(); delete l[b.dataset.del]; setGuardadas(l); renderLista();
+    };
+  });
+}
+
+$('btnGuardar').onclick = ()=>{
+  const nombre = ($('nombreGuardado').value || '').trim();
+  if(!nombre){ $('nombreGuardado').focus(); $('nombreGuardado').placeholder='Escribe un nombre primero'; return; }
+  const lista = getGuardadas();
+  lista[nombre] = leerFormulario();
+  setGuardadas(lista);
+  $('nombreGuardado').value = '';
+  renderLista();
+};
+
+$('btnLimpiar').onclick = ()=>{
+  CAMPOS.forEach(id=>{
+    const el = $(id);
+    if(el.tagName==='SELECT') el.selectedIndex = 0;
+    else if(id==='uf') el.value='40.826';
+    else if(id==='utmVal') el.value='71.649';
+    else if(id==='immVal') el.value='553.554';
+    else el.value='';
+  });
+  $('isapreBox').style.display='none';
+  autoguardar(); calc();
+};
+
+// Autoguardar en cada cambio
+CAMPOS.forEach(id => $(id).addEventListener('input', autoguardar));
+$('gratif').addEventListener('change', autoguardar);
+$('afp').addEventListener('change', autoguardar);
+$('contrato').addEventListener('change', autoguardar);
+$('salud').addEventListener('change', autoguardar);
+
+// Restaurar al abrir
+(function init(){
+  const auto = (()=>{ try{ return JSON.parse(localStorage.getItem(KEY_AUTO)); }catch(e){ return null; } })();
+  if(auto) escribirFormulario(auto);
+  renderLista();
+})();
+
+calc();
+</script>
+</body>
+</html>
